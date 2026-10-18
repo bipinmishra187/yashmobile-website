@@ -17,14 +17,30 @@ exports.handler = async (event) => {
 
     const data = JSON.parse(event.body || "{}");
 
-    const message = [
-      "🔔 YASH MOBILE - NEW ENQUIRY",
-      "",
-      "📌 Category: " + String(data.category || "General"),
-      "📝 Details: " + String(data.details || data.message || "Not provided"),
-      "👤 Name: " + String(data.name || "Not provided"),
-      "📞 Phone: " + String(data.phone || "Not provided")
-    ].join("\n");
+    const getValue = (...keys) => {
+  for (const key of keys) {
+    const value = Object.entries(data).find(
+      ([k, v]) =>
+        k.toLowerCase() === key.toLowerCase() &&
+        String(v).trim()
+    )?.[1];
+
+    if (value !== undefined) return String(value).trim();
+  }
+  return "Not provided";
+};
+
+const message = [
+  "🔔 YASH MOBILE - NEW ENQUIRY",
+  "",
+  "📌 Category: " + getValue("category"),
+  "🛠 Service: " + getValue("service", "Service Required", "Choose Service"),
+  "👤 Name: " + getValue("name", "Name", "Full Name"),
+  "📞 Phone: " + getValue("phone", "Contact Mobile Number", "Mobile"),
+  "💻 Brand / Model: " + getValue("brand", "Brand / Model"),
+  "💰 Budget: " + getValue("budget", "Budget (optional)"),
+  "📝 Details: " + getValue("details", "message", "Issue or Requirements")
+].join("\n");
 
     const response = await fetch(
       "https://api.telegram.org/bot" + token + "/sendMessage",
